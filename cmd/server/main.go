@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
-	"github.com/ethanjmarchand/ezquote/internal/api"
+	"github.com/ethanjmarchand/ezquote/internal/quoting"
 	"github.com/ethanjmarchand/ezquote/internal/startup"
 	"github.com/ethanjmarchand/ezquote/internal/web"
 )
@@ -15,24 +16,26 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = run(config)
-	if err != nil {
+	if err = run(config); err != nil {
 		log.Fatal(err)
 	}
-
 }
 
 func run(s *startup.Config) error {
-	service := api.NewAPIService(api.GeckoWorker{
+	// TODO: Return an Error
+	service := quoting.NewAPIService(quoting.GeckoWorker{
 		Config: s,
+		NetClient: &http.Client{
+			Timeout: time.Second * 10,
+		},
 	})
-
+	// TODO: Create "new" functions for homehandler and listhandler
 	http.Handle("GET /", &web.HomeHandler{Service: *service})
 	http.Handle("GET /quote/{quote}", &web.ListHandler{Service: *service})
 	fmt.Printf("Starting server on port %s", s.Server)
 	err := http.ListenAndServe(s.Server, nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("server closed %w", err)
 	}
 	return nil
 }

@@ -7,12 +7,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type Config struct {
-	APIKey string
-	APIURL string
-	Server string
-}
-
 func LoadEnv(filenames ...string) (*Config, error) {
 	err := godotenv.Load(filenames...)
 	if err != nil {
