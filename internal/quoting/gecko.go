@@ -14,9 +14,13 @@ var (
 	ErrInvalidCoinID = errors.New("invalid coin id")
 )
 
+type Doer interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
 type GeckoWorker struct {
 	Config    *startup.Config
-	NetClient *http.Client
+	NetClient Doer
 }
 
 type Coin struct {
